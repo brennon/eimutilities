@@ -1,6 +1,7 @@
 __author__ = 'Brennon Bortz'
+__version__ = '0.2.1'
 
-import pymongo
+# import pymongo
 import mongoengine
 
 # import eim.tools.document
@@ -51,5 +52,8 @@ def connect(username, password):
     password : str
         The password to use for authentication
     """
-    mongoengine.connect(host='mongodb://%s:%s@db0.musicsensorsemotion.com:27017/eim' % (username, password))
+    mongoengine.connect(
+        host='mongodb://%s:%s@db0.musicsensorsemotion.com,db1.musicsensorsemotion.com,db2.musicsensorsemotion.com,db3.musicsensorsemotion.com/eim' % (username, password),
+        replicaSet='rs-eim'
+    )
 
