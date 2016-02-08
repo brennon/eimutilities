@@ -1,6 +1,7 @@
 __author__ = 'Brennon Bortz'
+__version__ = '0.2.1'
 
-import pymongo
+# import pymongo
 import mongoengine
 
 # import eim.tools.document
