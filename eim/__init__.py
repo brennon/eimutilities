@@ -1,10 +1,13 @@
 __author__ = 'Brennon Bortz'
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 # import pymongo
 import mongoengine
 
-# import eim.tools.document
+
+import eim.documents
+import eim.tools
+
 # import eim.tools.database
 
 # def connect(username, password):
