@@ -28,6 +28,16 @@ class Signal(mongoengine.DynamicDocument):
         out : :py:class:`pandas.DataFrame`
             This :py:class:`pandas.DataFrame` contains each recorded signal in
             its columns.
+
+        Examples
+        --------
+        >>> import eim
+        >>> eim.connect('eim', 'eim')
+        >>> signal = Signal.objects(id='5410edbb08ad6ee3090e20be')[0]
+        >>> data = signal.original_signals()
+        >>> data.iloc[0:1]
+           eda_filtered  eda_raw  eda_status      hr  hr_status  pox_raw  timestamps
+        0        135.05      136           1  48.387          0        0           0
         """
         if self._original_signals is None:
 
