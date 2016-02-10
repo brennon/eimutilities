@@ -1,4 +1,8 @@
+import tempfile, csv
+
 import mongoengine
+import numpy as np
+import pandas as pd
 
 class Signal(mongoengine.DynamicDocument):
     """
@@ -8,9 +12,63 @@ class Signal(mongoengine.DynamicDocument):
     signals.
     """
     meta = {
-        'collection' : 'signals'
+        'collection': 'signals'
     }
 
+    data_file = mongoengine.FileField(collection_name='signals')
+    _original_signals = None
+
+
+    def original_signals(self):
+        """
+        Retrieve the original signal data from GridFS.
+
+        Returns
+        -------
+        out : :py:class:`pandas.DataFrame`
+            This :py:class:`pandas.DataFrame` contains each recorded signal in
+            its columns.
+        """
+        if self._original_signals is None:
+
+            # Read the file that original_data_file references into a temp file
+            # and extract lines
+            with tempfile.TemporaryFile(mode='w+') as csv_file:
+                csv_file.write(self.data_file.read().decode('utf-8'))
+                csv_file.seek(0)
+
+                dialect = csv.Sniffer().sniff(csv_file.read(1024))
+                csv_file.seek(0)
+
+                reader = csv.reader(csv_file, dialect)
+                lines = list(reader)
+
+            # First line should be column names
+            columns = lines[0]
+            out_dict = {}
+            for column in columns:
+                out_dict[column] = []
+
+            # Build lists for each column
+            for line in lines[1:]:
+                for i, column in enumerate(columns):
+                    out_dict[column].append(line[i])
+
+            # Convert each column list to a numpy.ndarray
+            for column in columns:
+                column_type = str if out_dict[column][0] == 'NA' else 'float64'
+                out_dict[column] = np.asarray(
+                    out_dict[column], dtype=column_type
+                )
+
+            # If timestamps are present, convert them to whole second measures
+            if 'timestamps' in columns:
+                out_dict['timestamps'] *= 0.001
+
+            # Return a pandas.DataFrame of the signals and cache them
+            self._original_signals = pd.DataFrame(out_dict)
+
+        return self._original_signals
 
 class Trial(mongoengine.DynamicDocument):
     """
