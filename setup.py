@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='eim',
-    version='0.2.2',
+    version='0.2.3',
     packages=['eim',
               'eim.tools',
               'eim.documents'],
@@ -11,5 +11,5 @@ setup(
     author='Brennon Bortz',
     author_email='brennon@vt.edu',
     description='Library for interacting with Emotion and Motion resources',
-    install_requires=['pymongo', 'pandas', 'mongoengine>=0.10.6', 'numpy']
+    install_requires=['pymongo', 'pandas', 'mongoengine>=0.10.6', 'numpy', 'scipy']
 )
