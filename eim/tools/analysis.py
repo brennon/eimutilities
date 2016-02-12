@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.interpolate
 
 def bioemo_readings_to_volts(readings):
     """
@@ -636,11 +637,27 @@ def detect_artifacts(data, fs, up=0.2, down=0.1, signal_min=0., signal_max=1., w
 
         if mode == 'interpolate':
 
+            # TODO: We should use more than one index preceding and following artifact for interpolation
             # Add the previous and following indices onto r
-            r = np.insert(r, 0, r[0] - 1)
-            r = np.append(r, r[-1] + 1)
-            interpolated_artifact = np.interp(
-                    r, [r[0], r[-1]], [data[r[0]], data[r[-1]]]
+
+            actual_artifact_indices = r.copy()
+            non_artifact_indices = np.array([], dtype=np.dtype(np.int64))
+
+            to_prepend = np.arange(r[0] - 5, r[0])
+            to_append = np.arange(r[-1] + 1, r[-1] + 6)
+
+            # r = np.insert(r, 0, r[0] - 1)
+            # r = np.append(r, r[-1] + 1)
+
+            non_artifact_indices = np.insert(non_artifact_indices, 0, to_prepend)
+            non_artifact_indices = np.append(non_artifact_indices, to_append)
+
+            too_low = non_artifact_indices < 0
+            too_high = non_artifact_indices > len(data) - 1
+            non_artifact_indices = non_artifact_indices[~(too_low + too_high)]
+
+            interpolated_artifact = scipy.interpolate.pchip_interpolate(
+                non_artifact_indices, data[non_artifact_indices], actual_artifact_indices
             )
 
             normalized_data[r] = interpolated_artifact
