@@ -48,251 +48,256 @@
 #     flattened = flatten_documents(documents, sep)
 #     df = pandas.DataFrame(flattened)
 #     return df
-#
-# def flatten_documents(documents, sep='.'):
-#     """
-#     'Flatten' a list of documents so that there are no nested keys.
-#
-#     Nested keys become concatenated with their parent(s) using ``sep``. For instance, the dictionary
-#     ``{'foo': [{'bar':1},2,3]}`` is flattened to a dictionary with the keys ``foo.0.bar``, ``foo.1``, and ``foo.2``.
-#     This method works only for dictionaries that would qualify as JSON. In other words, only those dictionaries that
-#     contain atomic types, lists, and other dictionaries will work with this method.
-#
-#     Parameters
-#     ----------
-#     documents : list of dict
-#         The document to be flattened
-#     sep : str, optional
-#         The string to use when joining nested keys into a flattened key (the default is `'.'`)
-#
-#     Returns
-#     -------
-#     out : list of dict
-#         A list of flattened documents
-#
-#     Examples
-#     --------
-#     >>> a_dict = {'foo': [{'bar':1},2,3]}
-#     >>> b_dict = {'bam': [{'baz':4}]}
-#     >>> flat_dicts = flatten_documents([a_dict, b_dict])
-#     >>> flat_dicts[0]['foo.0.bar']
-#     1
-#     >>> flat_dicts[0]['foo.1']
-#     2
-#     >>> flat_dicts[0]['foo.2']
-#     3
-#     >>> flat_dicts[1]['bam.0.baz']
-#     4
-#     """
-#     return [flatten_document(doc, sep=sep) for doc in documents]
-#
-# def flatten_document(document, sep='.'):
-#     """
-#     'Flatten' a document so that there are no nested keys.
-#
-#     Nested keys become concatenated with their parent(s) using ``sep``. For instance, the dictionary
-#     ``{'foo': [{'bar':1},2,3]}`` is flattened to a dictionary with the keys ``foo.0.bar``, ``foo.1``, and ``foo.2``.
-#     This method works only for dictionaries that would qualify as JSON. In other words, only those dictionaries that
-#     contain atomic types, lists, and other dictionaries will work with this method.
-#
-#     Parameters
-#     ----------
-#     document : dict
-#         The document to be flattened
-#     sep : str, optional
-#         The string to use when joining nested keys into a flattened key (the default is `'.'`)
-#
-#     Returns
-#     -------
-#     out : dict
-#         The flattened document
-#
-#     Examples
-#     --------
-#     >>> a_dict = {'foo': [{'bar':1},2,3]}
-#     >>> flat_dict = flatten_document(a_dict)
-#     >>> flat_dict['foo.0.bar']
-#     1
-#     >>> flat_dict['foo.1']
-#     2
-#     >>> flat_dict['foo.2']
-#     3
-#     """
-#     doc_keys = sorted(all_keys(document, sep=sep))
-#     flattened = {}
-#     for key in doc_keys:
-#         flattened[key] = dict_value_for_keypath(document, key, sep=sep)
-#     return flattened
-#
-# def all_keys(dictionary, sep='.', parent_key='', only_leaves=True):
-#     """
-#     Extract all keys of a dictionary and place them in a list.
-#
-#     This method works only for dictionaries that would qualify as JSON. In other words, only those dictionaries that
-#     contain atomic types, lists, and other dictionaries will work with this method. Keys are joined together using the
-#     string specified in ``sep``. Only 'leaf' keys will be extracted when ``only_leaves`` is ``True`` (default). The
-#     entries of lists will be represented as single numbers in the 'keypath'. For instance, in ``{'foo': [1,2,3]}``, the
-#     extracted keys would be ``foo.0``, ``foo.1``, and ``foo.2``.
-#
-#     Parameters
-#     ----------
-#     dictionary : dict
-#         The dictionary from which to extract keys
-#     sep : str, optional
-#         The string to use when joining nested keys into a flattened key (the default is `'.'`)
-#     parent_key : str, optional
-#         The prefix keypath (used in recursive calls; the default is `''`
-#     only_leaves : bool
-#         If `True`, only 'leaf' keys will be extracted.
-#
-#     Returns
-#     -------
-#     out : list of str
-#         The list of extracted keys
-#
-#     Examples
-#     --------
-#     >>> a_dict = {'foo': 'bar'}
-#     >>> dict_keys = all_keys(a_dict)
-#     >>> set(dict_keys) == set(['foo'])
-#     True
-#
-#     >>> a_dict = {'foo': [1,2,3]}
-#     >>> dict_keys = all_keys(a_dict)
-#     >>> set(dict_keys) == set(['foo.0', 'foo.1', 'foo.2'])
-#     True
-#
-#     >>> a_dict = {'foo': [{'bar':1},2,3]}
-#     >>> dict_keys = all_keys(a_dict)
-#     >>> set(dict_keys) == set(['foo.0.bar', 'foo.1', 'foo.2'])
-#     True
-#
-#     >>> a_dict = {'foo': [{'bar':1},2,3]}
-#     >>> dict_keys = all_keys(a_dict, sep='_')
-#     >>> set(dict_keys) == set(['foo_0_bar', 'foo_1', 'foo_2'])
-#     True
-#
-#     >>> a_dict = {'foo': [{'bar':1},2,3]}
-#     >>> dict_keys = all_keys(a_dict, only_leaves=False)
-#     >>> set(dict_keys) == set(['foo', 'foo.0', 'foo.1', 'foo.2', 'foo.0.bar'])
-#     True
-#     """
-#
-#     import collections
-#
-#     key_set = set()
-#
-#     for key, value in dictionary.items():
-#         new_key = parent_key + sep + key if parent_key else key
-#
-#         if isinstance(value, collections.MutableMapping):
-#             if not only_leaves:
-#                 key_set.add(new_key)
-#
-#             children = all_keys(value, sep=sep, parent_key=new_key, only_leaves=only_leaves)
-#             key_set = key_set.union(children)
-#         elif isinstance(value, list):
-#             if not only_leaves:
-#                 key_set.add(new_key)
-#
-#             for i in range(len(value)):
-#                 list_index_key = new_key + sep + str(i)
-#                 if not only_leaves:
-#                     key_set.add(list_index_key)
-#
-#                 # Recurse if the list entry is a dict
-#                 if isinstance(value[i], dict):
-#                     children = all_keys(value[i], sep=sep, parent_key=list_index_key, only_leaves=only_leaves)
-#                     key_set = key_set.union(children)
-#
-#                 # Otherwise, just add a key with the index in dot notation
-#                 else:
-#                     key_set.add(new_key + sep + str(i))
-#         else:
-#             key_set.add(new_key)
-#
-#     return list(key_set)
-#
-# def dict_value_for_keypath(dictionary, keypath, sep='.'):
-#     """
-#     Traverse the ``sep``-delimited 'keypath' in `dictionary` and return its value.
-#
-#     This method works only for dictionaries that would qualify as JSON. In other words, only those dictionaries that
-#     contain atomic types, lists, and other dictionaries will work with this method. Keypaths are split by `sep`, and
-#     these individual keys are used to traverse the dictionary.
-#
-#     Parameters
-#     ----------
-#     dictionary : dict
-#         The dictionary to traverse
-#     keypath : str
-#         The ``sep``-delimited compound keypath
-#     sep : str, optional
-#         The delimiter used in building the keypath (the default is `'.'`)
-#
-#     Returns
-#     -------
-#     out : any
-#         The value for the keypath. This may be a ``dict`` or ``list`` of values.
-#
-#     Examples
-#     --------
-#     >>> a_dict = {'foo': 'bar'}
-#     >>> val = dict_value_for_keypath(a_dict, 'foo')
-#     >>> val == 'bar'
-#     True
-#
-#     >>> a_dict = {'foo': [1,2,3]}
-#     >>> val = dict_value_for_keypath(a_dict, 'foo.1')
-#     >>> val == 2
-#     True
-#
-#     >>> a_dict = {'foo': [{'bar':1},2,3]}
-#     >>> val = dict_value_for_keypath(a_dict, 'foo.0.bar')
-#     >>> val == 1
-#     True
-#     >>> val = dict_value_for_keypath(a_dict, 'foo.1')
-#     >>> val == 2
-#     True
-#     >>> val = dict_value_for_keypath(a_dict, 'foo.0')
-#     >>> val == {'bar': 1}
-#     True
-#     >>> val = dict_value_for_keypath(a_dict, 'foo.3')
-#     Traceback (most recent call last):
-#         ...
-#     IndexError: list index out of range
-#
-#     >>> a_dict = {'foo': [{'bar':[{'baz': 'cheese'}]}]}
-#     >>> val = dict_value_for_keypath(a_dict, 'foo.0.bar.0.baz')
-#     >>> val == 'cheese'
-#     True
-#
-#     >>> a_dict = {'foo': [{'bar':[{'baz': 'cheese'}]}]}
-#     >>> val = dict_value_for_keypath(a_dict, 'foo_0_bar_0_baz', sep='_')
-#     >>> val == 'cheese'
-#     True
-#     """
-#
-#     import collections
-#
-#     if keypath == '':
-#         return dictionary
-#
-#     key_list = keypath.split(sep=sep)
-#
-#     value_for_key = None
-#
-#     remaining_keypath = sep.join(key_list[1:])
-#
-#     # pprint(dictionary)
-#
-#     if isinstance(dictionary, collections.MutableMapping):
-#         value_for_key = dict_value_for_keypath(dictionary[key_list[0]], remaining_keypath, sep)
-#     elif isinstance(dictionary, list):
-#         value_for_key = dict_value_for_keypath(dictionary[int(key_list[0])], remaining_keypath, sep)
-#
-#     return value_for_key
-#
+
+
+def flatten_documents(documents, sep='.'):
+    """
+    'Flatten' a list of documents so that there are no nested keys.
+
+    Nested keys become concatenated with their parent(s) using ``sep``. For instance, the dictionary
+    ``{'foo': [{'bar':1},2,3]}`` is flattened to a dictionary with the keys ``foo.0.bar``, ``foo.1``, and ``foo.2``.
+    This method works only for dictionaries that would qualify as JSON. In other words, only those dictionaries that
+    contain atomic types, lists, and other dictionaries will work with this method.
+
+    Parameters
+    ----------
+    documents : list of dict
+        The document to be flattened
+    sep : str, optional
+        The string to use when joining nested keys into a flattened key (the default is `'.'`)
+
+    Returns
+    -------
+    out : list of dict
+        A list of flattened documents
+
+    Examples
+    --------
+    >>> a_dict = {'foo': [{'bar':1},2,3]}
+    >>> b_dict = {'bam': [{'baz':4}]}
+    >>> flat_dicts = flatten_documents([a_dict, b_dict])
+    >>> flat_dicts[0]['foo.0.bar']
+    1
+    >>> flat_dicts[0]['foo.1']
+    2
+    >>> flat_dicts[0]['foo.2']
+    3
+    >>> flat_dicts[1]['bam.0.baz']
+    4
+    """
+    return [flatten_document(doc, sep=sep) for doc in documents]
+
+
+def flatten_document(document, sep='.'):
+    """
+    'Flatten' a document so that there are no nested keys.
+
+    Nested keys become concatenated with their parent(s) using ``sep``. For instance, the dictionary
+    ``{'foo': [{'bar':1},2,3]}`` is flattened to a dictionary with the keys ``foo.0.bar``, ``foo.1``, and ``foo.2``.
+    This method works only for dictionaries that would qualify as JSON. In other words, only those dictionaries that
+    contain atomic types, lists, and other dictionaries will work with this method.
+
+    Parameters
+    ----------
+    document : dict
+        The document to be flattened
+    sep : str, optional
+        The string to use when joining nested keys into a flattened key (the default is `'.'`)
+
+    Returns
+    -------
+    out : dict
+        The flattened document
+
+    Examples
+    --------
+    >>> a_dict = {'foo': [{'bar':1},2,3]}
+    >>> flat_dict = flatten_document(a_dict)
+    >>> flat_dict['foo.0.bar']
+    1
+    >>> flat_dict['foo.1']
+    2
+    >>> flat_dict['foo.2']
+    3
+    """
+    doc_keys = sorted(all_keys(document, sep=sep))
+    flattened = {}
+    for key in doc_keys:
+        flattened[key] = dict_value_for_keypath(document, key, sep=sep)
+    return flattened
+
+
+def all_keys(dictionary, sep='.', parent_key='', only_leaves=True):
+    """
+    Extract all keys of a dictionary and place them in a list.
+
+    This method works only for dictionaries that would qualify as JSON. In other words, only those dictionaries that
+    contain atomic types, lists, and other dictionaries will work with this method. Keys are joined together using the
+    string specified in ``sep``. Only 'leaf' keys will be extracted when ``only_leaves`` is ``True`` (default). The
+    entries of lists will be represented as single numbers in the 'keypath'. For instance, in ``{'foo': [1,2,3]}``, the
+    extracted keys would be ``foo.0``, ``foo.1``, and ``foo.2``.
+
+    Parameters
+    ----------
+    dictionary : dict
+        The dictionary from which to extract keys
+    sep : str, optional
+        The string to use when joining nested keys into a flattened key (the default is `'.'`)
+    parent_key : str, optional
+        The prefix keypath (used in recursive calls; the default is `''`
+    only_leaves : bool
+        If `True`, only 'leaf' keys will be extracted.
+
+    Returns
+    -------
+    out : list of str
+        The list of extracted keys
+
+    Examples
+    --------
+    >>> a_dict = {'foo': 'bar'}
+    >>> dict_keys = all_keys(a_dict)
+    >>> set(dict_keys) == set(['foo'])
+    True
+
+    >>> a_dict = {'foo': [1,2,3]}
+    >>> dict_keys = all_keys(a_dict)
+    >>> set(dict_keys) == set(['foo.0', 'foo.1', 'foo.2'])
+    True
+
+    >>> a_dict = {'foo': [{'bar':1},2,3]}
+    >>> dict_keys = all_keys(a_dict)
+    >>> set(dict_keys) == set(['foo.0.bar', 'foo.1', 'foo.2'])
+    True
+
+    >>> a_dict = {'foo': [{'bar':1},2,3]}
+    >>> dict_keys = all_keys(a_dict, sep='_')
+    >>> set(dict_keys) == set(['foo_0_bar', 'foo_1', 'foo_2'])
+    True
+
+    >>> a_dict = {'foo': [{'bar':1},2,3]}
+    >>> dict_keys = all_keys(a_dict, only_leaves=False)
+    >>> set(dict_keys) == set(['foo', 'foo.0', 'foo.1', 'foo.2', 'foo.0.bar'])
+    True
+    """
+
+    import collections
+
+    key_set = set()
+
+    for key, value in dictionary.items():
+        new_key = parent_key + sep + key if parent_key else key
+
+        if isinstance(value, collections.MutableMapping):
+            if not only_leaves:
+                key_set.add(new_key)
+
+            children = all_keys(value, sep=sep, parent_key=new_key, only_leaves=only_leaves)
+            key_set = key_set.union(children)
+        elif isinstance(value, list):
+            if not only_leaves:
+                key_set.add(new_key)
+
+            for i in range(len(value)):
+                list_index_key = new_key + sep + str(i)
+                if not only_leaves:
+                    key_set.add(list_index_key)
+
+                # Recurse if the list entry is a dict
+                if isinstance(value[i], dict):
+                    children = all_keys(value[i], sep=sep, parent_key=list_index_key, only_leaves=only_leaves)
+                    key_set = key_set.union(children)
+
+                # Otherwise, just add a key with the index in dot notation
+                else:
+                    key_set.add(new_key + sep + str(i))
+        else:
+            key_set.add(new_key)
+
+    return list(key_set)
+
+
+def dict_value_for_keypath(dictionary, keypath, sep='.'):
+    """
+    Traverse the ``sep``-delimited 'keypath' in `dictionary` and return its value.
+
+    This method works only for dictionaries that would qualify as JSON. In other words, only those dictionaries that
+    contain atomic types, lists, and other dictionaries will work with this method. Keypaths are split by `sep`, and
+    these individual keys are used to traverse the dictionary.
+
+    Parameters
+    ----------
+    dictionary : dict
+        The dictionary to traverse
+    keypath : str
+        The ``sep``-delimited compound keypath
+    sep : str, optional
+        The delimiter used in building the keypath (the default is `'.'`)
+
+    Returns
+    -------
+    out : any
+        The value for the keypath. This may be a ``dict`` or ``list`` of values.
+
+    Examples
+    --------
+    >>> a_dict = {'foo': 'bar'}
+    >>> val = dict_value_for_keypath(a_dict, 'foo')
+    >>> val == 'bar'
+    True
+
+    >>> a_dict = {'foo': [1,2,3]}
+    >>> val = dict_value_for_keypath(a_dict, 'foo.1')
+    >>> val == 2
+    True
+
+    >>> a_dict = {'foo': [{'bar':1},2,3]}
+    >>> val = dict_value_for_keypath(a_dict, 'foo.0.bar')
+    >>> val == 1
+    True
+    >>> val = dict_value_for_keypath(a_dict, 'foo.1')
+    >>> val == 2
+    True
+    >>> val = dict_value_for_keypath(a_dict, 'foo.0')
+    >>> val == {'bar': 1}
+    True
+    >>> val = dict_value_for_keypath(a_dict, 'foo.3')
+    Traceback (most recent call last):
+        ...
+    IndexError: list index out of range
+
+    >>> a_dict = {'foo': [{'bar':[{'baz': 'cheese'}]}]}
+    >>> val = dict_value_for_keypath(a_dict, 'foo.0.bar.0.baz')
+    >>> val == 'cheese'
+    True
+
+    >>> a_dict = {'foo': [{'bar':[{'baz': 'cheese'}]}]}
+    >>> val = dict_value_for_keypath(a_dict, 'foo_0_bar_0_baz', sep='_')
+    >>> val == 'cheese'
+    True
+    """
+
+    import collections
+
+    if keypath == '':
+        return dictionary
+
+    key_list = keypath.split(sep=sep)
+
+    value_for_key = None
+
+    remaining_keypath = sep.join(key_list[1:])
+
+    # pprint(dictionary)
+
+    if isinstance(dictionary, collections.MutableMapping):
+        value_for_key = dict_value_for_keypath(dictionary[key_list[0]], remaining_keypath, sep)
+    elif isinstance(dictionary, list):
+        value_for_key = dict_value_for_keypath(dictionary[int(key_list[0])], remaining_keypath, sep)
+
+    return value_for_key
+
+
 # def save_document_to_file(document, filepath, filename=''):
 #     """
 #     Serialize the document in ``document`` and save it to ``filepath``.
@@ -352,7 +357,8 @@
 #     outfile.close()
 #
 #     return actual_filepath
-#
+
+
 # def read_document_from_file(filepath):
 #     """
 #     Read a document that has been serialized to a file with :py:meth:`eim.tools.document.save_document_to_file`.
