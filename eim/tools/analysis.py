@@ -68,10 +68,13 @@ def bioemo_volts_to_ohms(volts):
     """
 
     volts = np.asarray(volts)
-    left = 0.861 / 0.00117
-    right = 1. / 0.00117
-    right = right * np.log(volts)
-    return (left - right) * 1000
+    # left = 0.861 / 0.00117
+    # right = 1. / 0.00117
+    # right = right * np.log(volts)
+    # return (left - right) * 1000
+    num = 1000 * np.log(volts) - 861
+    denom = -0.00117
+    return num / denom
 
 
 def bioemo_volts_to_siemens(volts):
