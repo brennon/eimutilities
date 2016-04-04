@@ -573,7 +573,7 @@ def detect_artifacts(data, fs, up=0.2, down=0.1, signal_min=0., signal_max=1., w
 
     # TODO: We could compare these to preceding values instead of losing them
     # Mark first fs indices as not artifacts
-    artifact_indices[0:fs] = False
+    artifact_indices[0:np.int(np.ceil(fs))] = False
     # print('corrected artifact_indices:', artifact_indices)
 
     # Convert boolean indices to integer indices
