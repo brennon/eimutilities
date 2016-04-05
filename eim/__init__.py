@@ -40,10 +40,10 @@ import eim.tools
 #
 #     return db
 
-def connect(username, password):
+def connect(username, password, authentication_database='eim'):
     """
-    Connect to the Emotion in Motion database and authenticate against the ``eim`` collection with the provided
-    username and password.
+    Connect to the Emotion in Motion database and authenticate against the
+    ``eim`` database with the provided username and password.
 
     You *must* connect to the database before performing database operations.
 
@@ -53,9 +53,11 @@ def connect(username, password):
         The username to use for authentication
     password : str
         The password to use for authentication
+    authentication_database : str
+        The database to use for authentication (default is ``'eim'``)
     """
     mongoengine.connect(
-        host='mongodb://%s:%s@db0.musicsensorsemotion.com,db1.musicsensorsemotion.com,db2.musicsensorsemotion.com,db3.musicsensorsemotion.com/eim' % (username, password),
+        host='mongodb://%s:%s@db0.musicsensorsemotion.com,db1.musicsensorsemotion.com,db2.musicsensorsemotion.com,db3.musicsensorsemotion.com/%s' % (username, password, authentication_database),
         replicaSet='rs-eim'
     )
 
