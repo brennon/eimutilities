@@ -6,15 +6,17 @@ import pandas as pd
 
 
 class TrialMetadata(mongoengine.EmbeddedDocument):
-    session_number = mongoengine.IntField(required=True)
+    session_number = mongoengine.StringField(required=True)
     location = mongoengine.StringField(required=True)
     terminal = mongoengine.IntField(required=True)
+    language = mongoengine.StringField(required=False)
 
 
 class SignalMetadata(mongoengine.EmbeddedDocument):
-    session_number = mongoengine.IntField(required=True)
+    session_number = mongoengine.StringField(required=True)
     location = mongoengine.StringField(required=True)
     terminal = mongoengine.IntField(required=True)
+    language = mongoengine.StringField(required=False)
 
 
 class Signal(mongoengine.Document):
