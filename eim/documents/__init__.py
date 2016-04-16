@@ -309,7 +309,7 @@ class Experiment(mongoengine.Document):
     terminals = mongoengine.ListField(mongoengine.IntField())
     start_date = mongoengine.DateTimeField()
     end_date = mongoengine.DateTimeField()
-    media_pool = mongoengine.ListField(mongoengine.ReferenceField(MediaPool))
+    media_pool = mongoengine.ReferenceField(MediaPool)
 
 
 class TrialRatings(mongoengine.DynamicEmbeddedDocument):
