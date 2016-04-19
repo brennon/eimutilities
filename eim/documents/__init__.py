@@ -6,7 +6,7 @@ import pandas as pd
 
 
 class TrialMetadata(mongoengine.EmbeddedDocument):
-    session_number = mongoengine.StringField(required=True)
+    session_number = mongoengine.DynamicField(required=True)
     location = mongoengine.StringField(required=True)
     terminal = mongoengine.IntField(required=True)
     language = mongoengine.StringField(required=False)
