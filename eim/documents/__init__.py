@@ -317,7 +317,7 @@ class TrialRatings(mongoengine.DynamicEmbeddedDocument):
     chills = mongoengine.ListField(mongoengine.FloatField())
     chillsshiversthrills = mongoengine.ListField(mongoengine.FloatField())
     engagement = mongoengine.ListField(mongoengine.FloatField())
-    familiarity = mongoengine.ListField(mongoengine.FloatField())
+    familiarity = mongoengine.ListField(mongoengine.DynamicField())
     goosebumps = mongoengine.ListField(mongoengine.FloatField())
     inspired = mongoengine.ListField(mongoengine.FloatField())
     joyfulactivation = mongoengine.ListField(mongoengine.FloatField())
