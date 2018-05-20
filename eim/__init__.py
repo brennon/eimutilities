@@ -57,7 +57,5 @@ def connect(username, password, authentication_database='eim'):
         The database to use for authentication (default is ``'eim'``)
     """
     mongoengine.connect(
-        host='mongodb://%s:%s@db0.musicsensorsemotion.com,db1.musicsensorsemotion.com,db2.musicsensorsemotion.com,db3.musicsensorsemotion.com/eim?authSource=%s' % (username, password, authentication_database),
-        replicaSet='rs-eim'
+        host='mongodb://%s:%s@db3.musicsensorsemotion.com/eim?authSource=%s' % (username, password, authentication_database)
     )
-

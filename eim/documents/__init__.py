@@ -1,5 +1,5 @@
-import tempfile, csv
-
+import tempfile
+import csv
 import mongoengine
 import numpy as np
 import pandas as pd
@@ -119,10 +119,12 @@ class Signal(mongoengine.Document):
         >>> import eim
         >>> eim.connect('eim', 'eim')
         >>> signal = Signal.objects(id='5410edbb08ad6ee3090e20be')[0]
-        >>> data = signal.original_signals()
-        >>> data.iloc[0:1]
-           eda_filtered  eda_raw  eda_status      hr  hr_status  pox_raw  timestamps
-        0        135.05      136           1  48.387          0        0           0
+        >>> data = signal.signal_file_as_dataframe('data_file')
+        >>> first_row = data.iloc[0]
+        >>> first_row.eda_filtered
+        135.05
+        >>> first_row.hr
+        48.387
         """
         # Read the file that original_data_file references into a temp file
         # and extract lines

@@ -26,7 +26,6 @@ def bioemo_readings_to_volts(readings):
     >>> np.abs(midrange - 2.5024437927663734) < 0.001
     True
     """
-
     return (np.asarray(readings) / 1023.) * 5.
 
 
@@ -66,7 +65,6 @@ def bioemo_volts_to_ohms(volts):
     >>> np.abs(two_volts - 143463.94823936306) < 0.001
     True
     """
-
     volts = np.asarray(volts)
     # left = 0.861 / 0.00117
     # right = 1. / 0.00117
@@ -102,7 +100,6 @@ def bioemo_volts_to_siemens(volts):
     >>> np.abs(two_volts - 6.9703922990572208e-06) < 0.001
     True
     """
-
     ohms = bioemo_volts_to_ohms(volts)
     siemens = ohms_to_siemens(ohms)
     return siemens
@@ -133,7 +130,6 @@ def bioemo_readings_to_siemens(readings):
     >>> np.abs(midrange - -2.0793430561630236e-05) < 0.001
     True
     """
-
     readings = np.asarray(readings)
     volts = bioemo_readings_to_volts(readings)
     return bioemo_volts_to_siemens(volts)
@@ -462,64 +458,63 @@ def detect_artifacts(data, fs, up=0.2, down=0.1, signal_min=0., signal_max=1., w
 
     Examples
     --------
+    >>> import numpy as np
     >>> data = [0.1, 0.1, 0.1, 0.3, 0.1, 0.1]
     >>> clean, q = detect_artifacts(data, 2, signal_min=0, signal_max=0.3)
-    >>> clean
-    array([ 0.1,  0.1,  0.1,  0.1,  0.1,  0.1])
+    >>> np.testing.assert_almost_equal(clean, np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1]))
     >>> np.testing.assert_almost_equal(q, 2./3.)
 
     >>> data = [0.1, 0.1, 0.1, 0.101, 0.1, 0.1]
     >>> clean, q = detect_artifacts(data, 2, signal_min=0, signal_max=0.3)
-    >>> clean
-    array([ 0.1  ,  0.1  ,  0.1  ,  0.101,  0.1  ,  0.1  ])
+    >>> np.testing.assert_almost_equal(clean, np.array([0.1, 0.1, 0.1, 0.101, 0.1, 0.1]))
     >>> q
     1.0
 
     >>> data = [0.1, 0.1, 0.1, 0.3, 0.1, 0.1]
-    >>> detect_artifacts(data, 2, signal_min=0, signal_max=0.3, mode='nan')[0]
-    array([ 0.1,  0.1,  0.1,  nan,  nan,  0.1])
+    >>> clean = detect_artifacts(data, 2, signal_min=0, signal_max=0.3, mode='nan')[0]
+    >>> np.testing.assert_almost_equal(clean, np.array([0.1, 0.1, 0.1, np.nan, np.nan, 0.1]))
 
     >>> data = [0.5, 0.55, 0.5, 0.55, 0.1, 0.2, 0.55, 0.9]
-    >>> detect_artifacts(data, 3, mode='nan')[0]
-    array([ 0.5 ,  0.55,  0.5 ,  0.55,   nan,   nan,   nan,   nan])
+    >>> clean = detect_artifacts(data, 3, mode='nan')[0]
+    >>> np.testing.assert_almost_equal(clean, np.array([0.5, 0.55, 0.5, 0.55, np.nan, np.nan, np.nan, np.nan]))
 
     >>> data = [0.5, 0.5, 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0]
-    >>> detect_artifacts(data, 2, signal_min=0., signal_max=1., window_size=1., mode='nan')[0]
-    array([ 0.5,  0.5,  0.5,  nan,  nan,  nan,  1. ,  1. ,  1. ])
+    >>> clean = detect_artifacts(data, 2, signal_min=0., signal_max=1., window_size=1., mode='nan')[0]
+    >>> np.testing.assert_almost_equal(clean, np.array([0.5, 0.5, 0.5, np.nan, np.nan, np.nan, 1, 1, 1]))
 
     >>> data = [0., 0., 0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0]
-    >>> detect_artifacts(data, 2, signal_min=0., signal_max=1., window_size=1., mode='nan')[0]
-    array([  0.,  nan,  nan,  nan,  nan,  nan,   1.,   1.,   1.])
+    >>> clean = detect_artifacts(data, 2, signal_min=0., signal_max=1., window_size=1., mode='nan')[0]
+    >>> np.testing.assert_almost_equal(clean, np.array([0, np.nan, np.nan, np.nan, np.nan, np.nan, 1, 1, 1]))
 
     >>> data = [0., 0., 0., 0., 1., 1., 1., 1., 1.]
-    >>> detect_artifacts(data, 2, signal_min=0., signal_max=1., window_size=2., mode='nan')[0]
-    array([  0.,   0.,  nan,  nan,  nan,  nan,  nan,   1.,   1.])
+    >>> clean = detect_artifacts(data, 2, signal_min=0., signal_max=1., window_size=2., mode='nan')[0]
+    >>> np.testing.assert_almost_equal(clean, np.array([0, 0, np.nan, np.nan, np.nan, np.nan, np.nan, 1, 1]))
 
     >>> data = [0., 0., 0., 0., 1., 1., 1., 1., 1.]
-    >>> detect_artifacts(data, 2, signal_min=0., signal_max=1., window_size=3., mode='nan')[0]
-    array([  0.,  nan,  nan,  nan,  nan,  nan,  nan,  nan,   1.])
+    >>> clean = detect_artifacts(data, 2, signal_min=0., signal_max=1., window_size=3., mode='nan')[0]
+    >>> np.testing.assert_almost_equal(clean, np.array([0, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 1]))
 
     >>> data = [0., 0., 0., 0., 0., 0., 0., 0., 1.]
-    >>> detect_artifacts(data, 2, signal_min=0., signal_max=1., window_size=3., mode='nan')[0]
-    array([  0.,   0.,   0.,   0.,   0.,  nan,  nan,  nan,  nan])
+    >>> clean = detect_artifacts(data, 2, signal_min=0., signal_max=1., window_size=3., mode='nan')[0]
+    >>> np.testing.assert_almost_equal(clean, np.array([0, 0, 0, 0, 0, np.nan, np.nan, np.nan, np.nan]))
 
     >>> data = [0., 0., 1., 1., 1., 1., 1., 1., 1.]
-    >>> detect_artifacts(data, 2, signal_min=0., signal_max=1., window_size=2., mode='nan')[0]
-    array([  0.,  nan,  nan,  nan,  nan,   1.,   1.,   1.,   1.])
+    >>> clean = detect_artifacts(data, 2, signal_min=0., signal_max=1., window_size=2., mode='nan')[0]
+    >>> np.testing.assert_almost_equal(clean, np.array([0, np.nan, np.nan, np.nan, np.nan, 1, 1, 1, 1]))
 
     >>> data = [0.5, 0.5, 0.5, 0.5, 0.4999, 0.5, 0.5, 0.5, 0.5]
-    >>> detect_artifacts(data, 2, signal_min=0.5, signal_max=1., mode='nan')[0]
-    array([ 0.5,  0.5,  0.5,  0.5,  nan,  0.5,  0.5,  0.5,  0.5])
+    >>> clean = detect_artifacts(data, 2, signal_min=0.5, signal_max=1., mode='nan')[0]
+    >>> np.testing.assert_almost_equal(clean, np.array([0.5, 0.5, 0.5, 0.5, np.nan, 0.5, 0.5, 0.5, 0.5]))
 
     >>> data = [0.5, 0.5, 0.5, 0.5, 0.5001, 0.5, 0.5, 0.5, 0.5]
-    >>> detect_artifacts(data, 2, signal_min=0., signal_max=0.5, mode='nan')[0]
-    array([ 0.5,  0.5,  0.5,  0.5,  nan,  0.5,  0.5,  0.5,  0.5])
+    >>> clean = detect_artifacts(data, 2, signal_min=0., signal_max=0.5, mode='nan')[0]
+    >>> np.testing.assert_almost_equal(clean, np.array([0.5, 0.5, 0.5, 0.5, np.nan, 0.5, 0.5, 0.5, 0.5]))
 
     .. [1] R. Kocielnik, N. Sidorova, F. M. Maggi, M. Ouwerkerk, and J.
-        H. D. M. Westerink, “Smart Technologies for Long-Term Stress
-        Monitoring at Work,” in Proceedings of the 2013 IEEE 26th
+        H. D. M. Westerink, "Smart Technologies for Long-Term Stress
+        Monitoring at Work," in Proceedings of the 2013 IEEE 26th
         International Symposium on Computer-Based Medical Systems (CBMS 2013),
-        University of Porto, Porto, Portugal, 2013, pp. 53–58.
+        University of Porto, Porto, Portugal, 2013, pp. 53-58.
     """
     data = np.array(data)
 
@@ -643,7 +638,7 @@ def detect_artifacts(data, fs, up=0.2, down=0.1, signal_min=0., signal_max=1., w
             # TODO: We should use more than one index preceding and following artifact for interpolation
             # Add the previous and following indices onto r
 
-            actual_artifact_indices = r.copy()
+            actual_artifact_indices = list(r)
             non_artifact_indices = np.array([], dtype=np.dtype(np.int64))
 
             to_prepend = np.arange(r[0] - 5, r[0])
@@ -848,17 +843,18 @@ def normalize_array(arr, range_min=0., range_max=1., clip=None):
 
     Examples
     --------
-    >>> normalize_array([-2, 0, 2])
-    array([ 0. ,  0.5,  1. ])
+    >>> import numpy as np
+    >>> n = normalize_array([-2, 0, 2])
+    >>> np.testing.assert_almost_equal(n, np.array([0, 0.5, 1]))
 
-    >>> normalize_array([-2, 0, 2], range_min=0.5, range_max=1.5)
-    array([ 0.5,  1. ,  1.5])
+    >>> n = normalize_array([-2, 0, 2], range_min=0.5, range_max=1.5)
+    >>> np.testing.assert_almost_equal(n, np.array([0.5, 1, 1.5]))
 
-    >>> normalize_array([1, 2, 3, 4, 5], clip=(2, 4))
-    array([ 0. ,  0. ,  0.5,  1. ,  1. ])
+    >>> n = normalize_array([1, 2, 3, 4, 5], clip=(2, 4))
+    >>> np.testing.assert_almost_equal(n, np.array([0, 0, 0.5, 1, 1]))
 
-    >>> normalize_array([-2, 0, 2], range_min=1., range_max=0.)
-    array([ 1. ,  0.5,  0. ])
+    >>> n = normalize_array([-2, 0, 2], range_min=1., range_max=0.)
+    >>> np.testing.assert_almost_equal(n, np.array([1, 0.5, 0]))
     """
     arr = np.array(arr)
 

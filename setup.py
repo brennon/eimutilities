@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='eim',
-    version='0.2.4',
+    version='0.2.5',
     packages=['eim',
               'eim.tools',
               'eim.documents'],
