@@ -4,6 +4,7 @@
 # import os
 # import uuid
 # import pandas
+from typing import Iterable, Optional, Any, List
 #
 # # FIXME: Check for any exceptions that might be thrown and document them
 #
@@ -50,7 +51,7 @@
 #     return df
 
 
-def flatten_documents(documents, sep='.'):
+def flatten_documents(documents: List[dict], sep: Optional[str]='.') -> List[dict]:
     """
     'Flatten' a list of documents so that there are no nested keys.
 
@@ -88,7 +89,7 @@ def flatten_documents(documents, sep='.'):
     return [flatten_document(doc, sep=sep) for doc in documents]
 
 
-def flatten_document(document, sep='.'):
+def flatten_document(document: dict, sep: Optional[str]='.') -> dict:
     """
     'Flatten' a document so that there are no nested keys.
 
@@ -127,7 +128,10 @@ def flatten_document(document, sep='.'):
     return flattened
 
 
-def all_keys(dictionary, sep='.', parent_key='', only_leaves=True):
+def all_keys(dictionary: dict,
+             sep: Optional[str]='.',
+             parent_key: Optional[str]='',
+             only_leaves: Optional[bool]=True) -> List[str]:
     """
     Extract all keys of a dictionary and place them in a list.
 
@@ -217,7 +221,7 @@ def all_keys(dictionary, sep='.', parent_key='', only_leaves=True):
     return list(key_set)
 
 
-def dict_value_for_keypath(dictionary, keypath, sep='.'):
+def dict_value_for_keypath(dictionary: dict, keypath: str, sep: Optional[str]='.') -> Any:
     """
     Traverse the ``sep``-delimited 'keypath' in `dictionary` and return its value.
 
