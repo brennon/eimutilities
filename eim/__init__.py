@@ -1,5 +1,5 @@
 __author__ = 'Brennon Bortz'
-__version__ = '0.2.3'
+__version__ = '0.2.6'
 
 # import pymongo
 import mongoengine
